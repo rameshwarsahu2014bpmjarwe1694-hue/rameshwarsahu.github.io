@@ -1,3 +1,5 @@
+
+
 <!-- =========================  
 FILE : admin-pyq.html  
 STRICT FINAL RULES COMPATIBLE VERSION  
@@ -369,21 +371,25 @@ let b = lines[2].replace(/^B\)\s*/i, "").trim();
 let c = lines[3].replace(/^C\)\s*/i, "").trim();  
 let d = lines[4].replace(/^D\)\s*/i, "").trim();  
   
-let ansLine = lines[5].toUpperCase();  
-  
-/* extract A/B/C/D */  
-let ans = ansLine.match(/[ABCD]/)?.[0] || "";  
-  
-/* skip invalid */  
-if (!question || !a || !b || !c || !d || !ans) {  
-console.log("SKIPPED:", block);  
-continue;  
-}  
-  
-let answer = a;  
-if (ans === "B") answer = b;  
-if (ans === "C") answer = c;  
-if (ans === "D") answer = d;  
+/* --- Purana Logic --- */
+let ans = ansLine.match(/[ABCD]/)?. || "";
+
+/* --- Naya aur Behtar Logic --- */
+// 1. Match ko case-insensitive banayein (i flag) aur trim karein
+let match = ansLine.match(/ANSWER:\s*([A-D])/i); 
+let ans = match ? match.toUpperCase() : "";
+
+if (!question || !a || !b || !c || !d || !ans) {
+    console.log("SKIPPED (Missing Data):", block);
+    continue;
+}
+
+let answer = "";
+if (ans === "A") answer = a;
+else if (ans === "B") answer = b;
+else if (ans === "C") answer = c;
+else if (ans === "D") answer = d;
+
   
 await addDoc(collection(db, "pyqQuestions"), {  
 category: esc(category),  
