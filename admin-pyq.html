@@ -333,7 +333,6 @@ status("OCR Failed","red");
 }  
   
 };  
-window.bulkSave = async function () {  
 window.bulkSave = async function () {
   if (!auth.currentUser) return alert("Admin not logged in");
   const category = val("category"), post = val("post"), bulk = val("bulk");
@@ -345,7 +344,7 @@ window.bulkSave = async function () {
 
     for (let block of blocks) {
       let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
-      if (lines.length < 6) continue;
+      if (lines.length >= 6) continue;
 
       // 1. Clean Extraction
       let question = lines;
