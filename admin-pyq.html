@@ -18,7 +18,6 @@ button{padding:12px;border:none;border-radius:8px;font-size:16px;font-weight:bol
 .delete-btn{background:#dc3545;color:#fff}
 .card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px}
 .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.small{font-size:14px;color:#666;margin-top:5px}
 .status{text-align:center;font-weight:bold;margin:12px 0}
 hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 </style>
@@ -98,13 +97,10 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
 
-// ORIGINAL HELPERS RESTORED
 function val(id){ return document.getElementById(id).value.trim(); }
 function status(t,color="green"){ let s = document.getElementById("statusMsg"); s.innerText=t; s.style.color=color; }
-function esc(str){ return String(str).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 function safe(v){ return String(v || "").replace(/^\d+[\.\)\-]\s*/,"").trim(); }
 
-// LOGIN
 window.manualLogin = function() {
     const p = document.getElementById("adminPass").value;
     signInWithEmailAndPassword(auth, ADMIN_EMAIL, p)
@@ -115,7 +111,6 @@ window.manualLogin = function() {
     }).catch(err => alert("Login Error: " + err.message));
 };
 
-// OCR RESTORED
 window.extractPdf = async function(){
     const file = document.getElementById("pdfFile").files;
     if(!file) return alert("Select File");
@@ -127,7 +122,6 @@ window.extractPdf = async function(){
     } catch(e) { status("OCR Failed", "red"); }
 };
 
-// SAVE PDF RESTORED
 window.savePdf = async function(){
     if(!auth.currentUser) return alert("Login First");
     try {
@@ -139,7 +133,6 @@ window.savePdf = async function(){
     } catch(e) { alert(e.message); }
 };
 
-// BULK SAVE - ONLY LOGIC FIXED (NO NESTED ARRAY, NO OPTION A BUG)
 window.bulkSave = async function() {
     if(!auth.currentUser) return alert("Login First");
     const cat = val("category"), post = val("post"), bulkTxt = val("bulk");
@@ -153,19 +146,29 @@ window.bulkSave = async function() {
         for (let block of blocks) {
             let lines = block.split('\n').map(l => l.trim()).filter(Boolean);
             if (lines.length >= 6) {
-                let q = String(lines), a = String(lines), b = String(lines), c = String(lines), d = String(lines);
-                let ansLine = String(lines[lines.length - 1]).toUpperCase();
+                // FIXED INDEXING: lines for question, 1-4 for options
+                let q = String(lines);
+                let a = String(lines);
+                let b = String(lines);
+                let c = String(lines);
+                let d = String(lines);
                 
+                let ansLine = String(lines[lines.length - 1]).toUpperCase();
                 let match = ansLine.match(/[A-D]/);
-                let letter = match ? match : "A";
+                let letter = (match && match) ? match : "A";
+                
                 let correct = a; 
                 if(letter === "B") correct = b;
                 else if(letter === "C") correct = c;
                 else if(letter === "D") correct = d;
 
                 await addDoc(collection(db, "pyqQuestions"), {
-                    category: String(cat), post: String(post), question: q,
-                    options: [a, b, c, d], answer: String(correct), createdAt: serverTimestamp()
+                    category: String(cat), 
+                    post: String(post), 
+                    question: q,
+                    options: [a, b, c, d], 
+                    answer: String(correct), 
+                    createdAt: serverTimestamp()
                 });
                 count++;
             }
@@ -176,7 +179,6 @@ window.bulkSave = async function() {
     } catch(e) { alert("Upload Failed: " + e.message); }
 };
 
-// LOAD & DELETE RESTORED
 async function loadAll(){
     try {
         const pSnap = await getDocs(query(collection(db,"pyqFiles"), orderBy("createdAt","desc")));
