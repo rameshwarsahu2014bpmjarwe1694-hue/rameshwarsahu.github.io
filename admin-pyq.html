@@ -5,46 +5,83 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Admin PYQ Panel</title>
 <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-    body{background:#f4f6f9;padding:20px}
-    .container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
-    h1{text-align:center;margin-bottom:20px}
-    .grid{display:grid;gap:12px}
-    input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none}
-    button{padding:12px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}
-    .save-btn{background:#007bff;color:#fff}
-    .status{text-align:center;font-weight:bold;margin:12px 0}
-    .card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6f9;padding:20px}
+.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
+h1{text-align:center;margin-bottom:20px}
+h3{margin:15px 0 10px}
+.grid{display:grid;gap:12px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none}
+textarea{min-height:110px}
+button{padding:12px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}
+.save-btn{background:#007bff;color:#fff}
+.delete-btn{background:#dc3545;color:#fff}
+.card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.small{font-size:14px;color:#666;margin-top:5px}
+.status{text-align:center;font-weight:bold;margin:12px 0}
+hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 </style>
 </head>
 <body>
 <div class="container">
-    <h1>Admin PYQ Panel</h1>
-    <div id="loginArea" class="grid" style="margin-bottom:20px;">
-        <input type="password" id="adminPass" placeholder="Enter Admin Password">
-        <button class="save-btn" onclick="manualLogin()">Login</button>
-    </div>
-    <div id="statusMsg" class="status">Waiting for Login...</div>
-    <hr style="margin:20px 0">
-    <div class="grid">
-        <select id="category">
-            <option value="">Select Category</option>
-            <option>PYQ 2024</option><option>PYQ 2025</option><option>Model Paper</option>
-        </select>
-        <select id="post">
-            <option value="">Select Post</option>
-            <option>MTS</option><option>POSTMAN</option><option>PA-SA</option>
-        </select>
-        <textarea id="bulk" placeholder="Question... A) Opt... B) Opt... Answer: B"></textarea>
-        <button class="save-btn" onclick="bulkSave()">Bulk Save All</button>
-    </div>
-    <hr style="margin:20px 0">
-    <div id="questionList">Loading...</div>
+<h1>Admin PYQ Panel</h1>
+
+<div id="loginArea" class="grid" style="margin-bottom:20px;">
+    <input type="password" id="adminPass" placeholder="Enter Admin Password">
+    <button class="save-btn" onclick="manualLogin()">Login to Access</button>
+</div>
+
+<div id="statusMsg" class="status">Waiting for Login...</div>
+<hr>
+
+<div class="grid">
+<select id="category">
+<option value="">Select Category</option>
+<option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option><option>PYQ 2023</option>
+<option>PYQ 2024</option><option>PYQ 2025</option><option>PYQ 2026</option>
+<option>Model Paper</option><option>Practice Set</option>
+</select>
+<select id="post">
+<option value="">Select Post</option>
+<option>MTS</option><option>POSTMAN</option><option>PA-SA</option>
+</select>
+</div>
+
+<hr>
+<h3>PDF OCR to Bulk Text</h3>
+<div class="grid">
+<input type="file" id="pdfFile" accept=".pdf,image/*">
+<button class="save-btn" onclick="extractPdf()">Extract Questions</button>
+</div>
+
+<hr>
+<h3>Save PDF Metadata</h3>
+<div class="grid">
+<input type="text" id="title" placeholder="PDF Title">
+<input type="text" id="fileName" placeholder="PDF File Name/URL">
+<textarea id="desc" placeholder="Description"></textarea>
+<button class="save-btn" onclick="savePdf()">Save PDF Info</button>
+</div>
+
+<hr>
+<h3>Bulk Import Questions</h3>
+<div class="grid">
+<textarea id="bulk" placeholder="Paste Questions here..."></textarea>
+<button class="save-btn" onclick="bulkSave()">Bulk Save All</button>
+</div>
+
+<hr>
+<h3>Saved PDFs</h3>
+<div id="pdfList">Loading...</div>
+<hr>
+<h3>Saved Questions</h3>
+<div id="questionList">Loading...</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -61,84 +98,103 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
 
+// ORIGINAL HELPERS RESTORED
+function val(id){ return document.getElementById(id).value.trim(); }
+function status(t,color="green"){ let s = document.getElementById("statusMsg"); s.innerText=t; s.style.color=color; }
+function esc(str){ return String(str).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function safe(v){ return String(v || "").replace(/^\d+[\.\)\-]\s*/,"").trim(); }
+
+// LOGIN
 window.manualLogin = function() {
     const p = document.getElementById("adminPass").value;
     signInWithEmailAndPassword(auth, ADMIN_EMAIL, p)
     .then(() => {
-        document.getElementById("statusMsg").innerText = "Logged In ✅";
+        status("Logged In ✅");
         document.getElementById("loginArea").style.display = "none";
         loadAll();
-    }).catch(err => alert("Login Failed: " + err.message));
+    }).catch(err => alert("Login Error: " + err.message));
 };
 
+// OCR RESTORED
+window.extractPdf = async function(){
+    const file = document.getElementById("pdfFile").files;
+    if(!file) return alert("Select File");
+    status("Reading OCR... ⏳", "blue");
+    try {
+        const result = await Tesseract.recognize(file, 'eng+hin');
+        document.getElementById("bulk").value = result.data.text;
+        status("OCR Done ✅");
+    } catch(e) { status("OCR Failed", "red"); }
+};
+
+// SAVE PDF RESTORED
+window.savePdf = async function(){
+    if(!auth.currentUser) return alert("Login First");
+    try {
+        await addDoc(collection(db, "pyqFiles"), {
+            category: val("category"), post: val("post"), title: val("title"),
+            fileName: val("fileName"), desc: val("desc"), createdAt: serverTimestamp()
+        });
+        status("PDF Saved ✅"); loadAll();
+    } catch(e) { alert(e.message); }
+};
+
+// BULK SAVE - ONLY LOGIC FIXED (NO NESTED ARRAY, NO OPTION A BUG)
 window.bulkSave = async function() {
     if(!auth.currentUser) return alert("Login First");
-    const cat = document.getElementById("category").value;
-    const post = document.getElementById("post").value;
-    const bulkTxt = document.getElementById("bulk").value.trim();
-
-    if(!cat || !post || !bulkTxt) return alert("All fields are required!");
+    const cat = val("category"), post = val("post"), bulkTxt = val("bulk");
+    if(!cat || !post || !bulkTxt) return alert("Fill All Fields");
 
     try {
-        document.getElementById("statusMsg").innerText = "Uploading... ⏳";
-        // Blocks splitting by empty lines
+        status("Uploading... ⏳", "blue");
         const blocks = bulkTxt.split(/\n\s*\n/);
         let count = 0;
 
         for (let block of blocks) {
             let lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-            
             if (lines.length >= 6) {
-                const q = lines;
-                const a = lines;
-                const b = lines;
-                const c = lines;
-                const d = lines;
+                let q = String(lines), a = String(lines), b = String(lines), c = String(lines), d = String(lines);
+                let ansLine = String(lines[lines.length - 1]).toUpperCase();
                 
-                // Answer detection logic
-                const ansLine = lines[lines.length - 1].toUpperCase();
-                const match = ansLine.match(/[A-D]/);
-                const letter = match ? match : "A";
-
-                let correct = a;
+                let match = ansLine.match(/[A-D]/);
+                let letter = match ? match : "A";
+                let correct = a; 
                 if(letter === "B") correct = b;
                 else if(letter === "C") correct = c;
                 else if(letter === "D") correct = d;
 
-                // CRITICAL FIX: Creating a clean array of strings
-                const cleanOptions = [String(a), String(b), String(c), String(d)];
-
                 await addDoc(collection(db, "pyqQuestions"), {
-                    category: String(cat),
-                    post: String(post),
-                    question: String(q),
-                    options: cleanOptions, 
-                    answer: String(correct),
-                    createdAt: serverTimestamp()
+                    category: String(cat), post: String(post), question: q,
+                    options: [a, b, c, d], answer: String(correct), createdAt: serverTimestamp()
                 });
                 count++;
             }
         }
-        document.getElementById("statusMsg").innerText = count + " Questions Saved ✅";
+        status(count + " Saved ✅");
         document.getElementById("bulk").value = "";
         loadAll();
-    } catch(e) { 
-        alert("Upload Error: " + e.message);
-        console.error("Firebase Error Details:", e);
-    }
+    } catch(e) { alert("Upload Failed: " + e.message); }
 };
 
+// LOAD & DELETE RESTORED
 async function loadAll(){
     try {
+        const pSnap = await getDocs(query(collection(db,"pyqFiles"), orderBy("createdAt","desc")));
+        let pHtml = "";
+        pSnap.forEach(d => { pHtml += `<div class="card"><div class="row"><span>${d.data().title}</span><button class="delete-btn" onclick="del('${d.id}','pyqFiles')">Del</button></div></div>`; });
+        document.getElementById("pdfList").innerHTML = pHtml || "No PDFs";
+
         const qSnap = await getDocs(query(collection(db,"pyqQuestions"), orderBy("createdAt","desc")));
         let qHtml = "";
-        qSnap.forEach(d => {
-            const data = d.data();
-            qHtml += `<div class="card"><b>${data.question}</b><br><small>Ans: ${data.answer}</small></div>`;
-        });
-        document.getElementById("questionList").innerHTML = qHtml || "No Data Found";
-    } catch(err) { console.log("Load Error:", err); }
+        qSnap.forEach(d => { qHtml += `<div class="card"><div class="row"><span>${safe(d.data().question)}</span><button class="delete-btn" onclick="del('${d.id}','pyqQuestions')">Del</button></div></div>`; });
+        document.getElementById("questionList").innerHTML = qHtml || "No Questions";
+    } catch(err) { console.log(err); }
 }
+
+window.del = async function(id, col){
+    if(confirm("Delete?")){ await deleteDoc(doc(db, col, id)); loadAll(); }
+};
 </script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>
