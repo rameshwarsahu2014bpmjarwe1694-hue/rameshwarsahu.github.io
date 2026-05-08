@@ -138,7 +138,6 @@ signInWithEmailAndPassword(auth, ADMIN_EMAIL, userPass)
     console.error("Firebase Error:", err.code);
 });
 
-
 const app = initializeApp(firebaseConfig);  
 const db = getFirestore(app);  
 const auth = getAuth(app);  
