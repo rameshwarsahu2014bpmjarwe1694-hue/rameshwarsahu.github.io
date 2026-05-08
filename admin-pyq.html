@@ -1,8 +1,4 @@
-<!-- =========================  
-FILE : admin-pyq.html  
-STRICT FINAL RULES COMPATIBLE VERSION  
-AUTO LOGIN + PDF + QUESTION + BULK + DELETE  
-========================= -->  <!DOCTYPE html>  <html lang="en">  
+<!DOCTYPE html>  <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width,initial-scale=1.0">  
@@ -288,7 +284,7 @@ window.extractPdf = async function(){
   
 if(!auth.currentUser) return alert("Admin not logged in");  
   
-const file = document.getElementById("pdfFile").files[0];  
+const file = document.getElementById("pdfFile").files;  
   
 if(!file) return alert("Choose PDF/Image");  
   
@@ -333,182 +329,29 @@ status("OCR Failed","red");
 }  
   
 };  
-  
-/* BULK SAVE - CLEAN VERSION */
-window.bulkSave = async function() {
-    const category = val("category");
-    const post = val("post");
-    const text = val("bulk");
 
-    if (!auth.currentUser) return alert("Admin not logged in");
-    if (!category || !post || !text) return alert("Select category/post and paste data");
+/* BULK SAVE */
+window.bulkSave = async function(){
 
-    try {
-        status("Uploading Bulk...", "blue");
-        let blocks = text.split(/\n\s*\n/);
-        let count = 0;
+const category = document.getElementById("category").value;
+const post = document.getElementById("post").value;
+const text = document.getElementById("bulk").value;
 
-        for (let block of blocks) {
-            let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+if(!category || !post || text === ""){
+alert("Select category/post and paste data");
+return;
+}
 
-            if (lines.length >= 6) {
-                let q = lines;
-                let a = lines;
-                let b = lines;
-                let c = lines;
-                let d = lines;
+let blocks = text.split(/\n\s*\n/);
+let count = 0;
 
-                let ansLine = lines.toUpperCase();
-                let correct = a; // Default A
+for(let block of blocks){
 
-                if (ansLine.includes("B")) correct = b;
-                if (ansLine.includes("C")) correct = c;
-                if (ansLine.includes("D")) correct = d;
+let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
 
-                await addDoc(collection(db, "pyqQuestions"), {
-                    category: esc(category),
-                    post: esc(post),
-                    question: esc(q),
-                    options: [esc(a), esc(b), esc(c), esc(d)],
-                    answer: esc(correct),
-                    createdAt: serverTimestamp()
-                });
-                count++;
-            }
-        }
+if(lines.length>=6){
 
-        document.getElementById("bulk").value = "";
-        status(count + " Questions Imported ✅");
-        loadAll();
-
-    } catch (err) {
-        console.log(err);
-        status("Bulk Upload Failed ❌", "red");
-    }
-};
-          
-    
-/* LOAD ALL */  
-async function loadAll(){  
+let q = lines;
+let a = lines;
+let b = lines;
   
-/* PDFs */  
-try{  
-  
-const pdfSnap = await getDocs(  
-query(collection(db,"pyqFiles"),orderBy("createdAt","desc"))  
-);  
-  
-let pdfHtml="";  
-  
-pdfSnap.forEach(item=>{  
-let d=item.data();  
-  
-pdfHtml += `  
-<div class="card">  
-<div class="row">  
-<div>  
-<b>${safe(d.title)}</b>  
-<div class="small">${safe(d.category)} | ${safe(d.post)}</div>  
-<div class="small">${safe(d.fileName)}</div>  
-<div class="small">${safe(d.desc)}</div>  
-</div>  
-<div>  
-<button class="delete-btn" onclick="deletePdf('${item.id}')">Delete</button>  
-</div>  
-</div>  
-</div>  
-`;  
-});  
-  
-document.getElementById("pdfList").innerHTML = pdfHtml || "No PDF Saved";  
-  
-}catch(err){  
-document.getElementById("pdfList").innerHTML="Load Failed";  
-}  
-  
-/* Questions */  
-try{  
-  
-const qSnap = await getDocs(  
-query(collection(db,"pyqQuestions"),orderBy("createdAt","desc"))  
-);  
-  
-let qHtml="";  
-let i=1;  
-  
-qSnap.forEach(item=>{  
-  
-let d=item.data();  
-  
-qHtml += `  
-<div class="card">  
-<div class="row">  
-  
-<div style="flex:1">  
-  
-<b style="font-size:17px;color:#111;line-height:1.6">  
-${i}. ${safe(d.question)}  
-</b>  
-  
-<div class="small" style="margin-top:8px;font-weight:bold;color:#444">  
-${safe(d.category)} | ${safe(d.post)}  
-</div>  
-  
-<div class="small" style="margin-top:10px;line-height:1.8;font-size:15px">  
-A. ${safe(d.options[0])}<br>  
-B. ${safe(d.options[1])}<br>  
-C. ${safe(d.options[2])}<br>  
-D. ${safe(d.options[3])}  
-</div>  
-  
-<div class="small" style="margin-top:10px;font-weight:bold;color:green;font-size:15px;">  
-Answer: ${safe(d.answer)}  
-</div>  
-  
-</div>  
-  
-<div>  
-<button class="delete-btn" onclick="deleteQ('${item.id}')">  
-Delete  
-</button>  
-</div>  
-  
-</div>  
-</div>  
-`;  
-  
-i++;  
-});  
-  
-document.getElementById("questionList").innerHTML=qHtml || "No Questions Saved";  
-  
-}catch(err){  
-document.getElementById("questionList").innerHTML="Load Failed";  
-}  
-  
-}  
-  
-/* DELETE */  
-window.deletePdf = async function(id){  
-  
-if(!confirm("Delete PDF?")) return;  
-  
-await deleteDoc(doc(db,"pyqFiles",id));  
-loadAll();  
-  
-};  
-  
-window.deleteQ = async function(id){  
-  
-if(!confirm("Delete Question?")) return;  
-  
-await deleteDoc(doc(db,"pyqQuestions",id));  
-loadAll();  
-  
-};  
-  
-document.addEventListener("contextmenu",e=>e.preventDefault());  
-  
-</script>  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>  
-</body>  
-</html>
