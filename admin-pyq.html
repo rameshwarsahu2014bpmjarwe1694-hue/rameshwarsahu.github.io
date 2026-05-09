@@ -185,7 +185,7 @@ window.saveQuestion = async function() {
     } catch(e) { status("Error: " + e.message, "red"); }
 };
 
-// --- FIX 3: BULK SAVE (Mapping Corrected) ---
+// --- FIX 3: BULK SAVE ---
 window.bulkSave = async function() {
     const raw = document.getElementById('bulk').value.trim();
     const cat = document.getElementById('category').value;
@@ -220,6 +220,35 @@ window.extractPdf = function() {
         document.getElementById('bulk').value = text;
         status("OCR Done! ✅");
     });
+};
+
+// --- FIX 5: LOAD ALL DATA (IMPORTANT: Iske bina login error dega) ---
+async function loadAll() {
+    try {
+        const qSnap = await getDocs(query(collection(db, "pyqQuestions"), orderBy("createdAt", "desc")));
+        let qHtml = "";
+        qSnap.forEach(docSnap => {
+            const d = docSnap.data();
+            qHtml += `<div class="card"><b>${d.question}</b><br><small>${d.category} | ${d.post}</small>
+                <button class="delete-btn" style="float:right" onclick="deleteQ('${docSnap.id}')">Delete</button></div>`;
+        });
+        document.getElementById("questionList").innerHTML = qHtml || "No Questions Found";
+
+        const pSnap = await getDocs(query(collection(db, "pdfs"), orderBy("createdAt", "desc")));
+        let pHtml = "";
+        pSnap.forEach(s => {
+            pHtml += `<div class="card"><b>${s.data().title}</b><button class="delete-btn" style="float:right" onclick="deleteItem('pdfs','${s.id}')">Delete</button></div>`;
+        });
+        document.getElementById("pdfList").innerHTML = pHtml || "No PDFs Found";
+    } catch (e) { console.error(e); }
+}
+
+window.deleteQ = async (id) => { 
+    if(confirm("Delete Question?")) { await deleteDoc(doc(db, "pyqQuestions", id)); loadAll(); } 
+};
+
+window.deleteItem = async (col, id) => { 
+    if(confirm("Delete PDF?")) { await deleteDoc(doc(db, col, id)); loadAll(); } 
 };
 
 
