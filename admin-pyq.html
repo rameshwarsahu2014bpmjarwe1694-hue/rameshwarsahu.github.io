@@ -149,97 +149,79 @@ async function loginAndStart() {
     }
 }
 
-// --- FIX: BULK SAVE FUNCTION ---
-window.saveBulk = async function() {
-    const raw = document.getElementById('bulkText').value.trim();
-    const cat = document.getElementById('category').value;
-    const post = document.getElementById('post').value;
-
-    if (!raw || !cat || !post) {
-        return alert("Text, Category aur Post select karna zaruri hai!");
-    }
-
-    const lines = raw.split('\n');
-    let count = 0;
-    status(`Uploading ${lines.length} Questions...`, "orange");
-
+// --- FIX 1: SAVE PDF ---
+window.savePdf = async function() {
+    const t = document.getElementById('title').value;
+    const f = document.getElementById('fileName').value;
+    const d = document.getElementById('desc').value;
+    if(!t || !f) return alert("Title aur File Name bharein!");
     try {
-        for (let line of lines) {
-            const p = line.split('|').map(x => x.trim());
-            // Format check: Question | A | B | C | D | Answer
-            if (p.length >= 6) {
-                await addDoc(collection(db, "pyqQuestions"), {
-                    question: p,
-                    options: [p, p, p, p],
-                    answer: p,
-                    category: cat,
-                    post: post,
-                    createdAt: serverTimestamp()
-                });
-                count++;
-            }
-        }
-        status(`${count} Questions Uploaded Successfully! ✅`);
-        document.getElementById('bulkText').value = "";
+        await addDoc(collection(db, "pdfs"), { title: t, fileName: f, description: d, createdAt: serverTimestamp() });
+        status("PDF Saved! ✅");
         loadAll();
-    } catch (e) {
-        status("Bulk Upload Error: " + e.message, "red");
-        console.error(e);
-    }
+    } catch(e) { status("Error: " + e.message, "red"); }
 };
 
-// --- SAVE SINGLE QUESTION ---
-window.saveSingleQuestion = async function() {
-    const q = document.getElementById('q_text').value;
-    const ans = document.getElementById('q_ans').value;
+// --- FIX 2: SAVE SINGLE QUESTION ---
+window.saveQuestion = async function() {
+    const q = document.getElementById('question').value;
+    const ans = document.getElementById('ans').value;
     const cat = document.getElementById('category').value;
     const post = document.getElementById('post').value;
-
-    if(!q || !ans || !cat || !post) return alert("Fill all fields!");
-
+    if(!q || !ans || !cat || !post) return alert("Sari fields bharein!");
     try {
-        status("Saving Question...", "blue");
         await addDoc(collection(db, "pyqQuestions"), {
             question: q,
             options: [
-                document.getElementById('q_a').value,
-                document.getElementById('q_b').value,
-                document.getElementById('q_c').value,
-                document.getElementById('q_d').value
+                document.getElementById('a').value,
+                document.getElementById('b').value,
+                document.getElementById('c').value,
+                document.getElementById('d').value
             ],
-            answer: ans,
-            category: cat,
-            post: post,
-            createdAt: serverTimestamp()
+            answer: ans, category: cat, post: post, createdAt: serverTimestamp()
         });
         status("Question Saved! ✅");
         loadAll();
     } catch(e) { status("Error: " + e.message, "red"); }
 };
 
-// --- LOAD ALL DATA ---
-async function loadAll() {
+// --- FIX 3: BULK SAVE (Mapping Corrected) ---
+window.bulkSave = async function() {
+    const raw = document.getElementById('bulk').value.trim();
+    const cat = document.getElementById('category').value;
+    const post = document.getElementById('post').value;
+    if(!raw || !cat || !post) return alert("Details bharein!");
+    const lines = raw.split('\n');
     try {
-        const qSnap = await getDocs(query(collection(db, "pyqQuestions"), orderBy("createdAt", "desc")));
-        let qHtml = "";
-        qSnap.forEach(docSnap => {
-            const d = docSnap.data();
-            qHtml += `<div class="card">
-                <b>${d.question}</b><br>
-                <small>${d.category} | ${d.post}</small><br>
-                <button class="delete-btn" style="float:right" onclick="deleteQ('${docSnap.id}')">Delete</button>
-            </div>`;
-        });
-        document.getElementById("questionList").innerHTML = qHtml || "No Data";
-    } catch (e) { console.error(e); }
-}
-
-window.deleteQ = async (id) => { 
-    if(confirm("Delete?")) { 
-        await deleteDoc(doc(db, "pyqQuestions", id)); 
-        loadAll(); 
-    } 
+        status(`Uploading ${lines.length} items...`, "orange");
+        for (let line of lines) {
+            const p = line.split('|').map(x => x.trim());
+            if (p.length >= 6) {
+                await addDoc(collection(db, "pyqQuestions"), {
+                    question: p,
+                    options: [p, p, p, p],
+                    answer: p,
+                    category: cat, post: post, createdAt: serverTimestamp()
+                });
+            }
+        }
+        status("Bulk Upload Success! ✅");
+        document.getElementById('bulk').value = "";
+        loadAll();
+    } catch (e) { status("Error: " + e.message, "red"); }
 };
+
+// --- FIX 4: OCR EXTRACT ---
+window.extractPdf = function() {
+    const file = document.getElementById('pdfFile').files;
+    if(!file) return alert("File choose karein!");
+    status("Processing OCR...", "orange");
+    Tesseract.recognize(file, 'eng+hin').then(({ data: { text } }) => {
+        document.getElementById('bulk').value = text;
+        status("OCR Done! ✅");
+    });
+};
+
 
 // Start application
 loginAndStart();
