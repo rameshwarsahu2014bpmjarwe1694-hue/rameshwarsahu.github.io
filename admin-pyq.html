@@ -196,44 +196,45 @@ window.bulkSave = async function() {
     const cat = document.getElementById('category').value;
     const post = document.getElementById('post').value;
 
-    if (!raw || !cat || !post) return alert("Category aur Post select karna jaruri hai!");
+    if (!raw || !cat || !post) return alert("Category aur Post select karein!");
 
     const lines = raw.split('\n');
     let successCount = 0;
 
     try {
-        status("Uploading started...", "orange");
+        status("Uploading...", "orange");
 
         for (let line of lines) {
             let cleanLine = line.trim();
             if (!cleanLine || !cleanLine.includes('|')) continue;
 
-            // 1. Sawal aur baki hissa alag karein
+            // Step 1: Sawal aur baki hisse ko Pipe (|) se alag kiya
             const parts = cleanLine.split('|').map(x => x.trim());
-            const questionText = parts; 
+            
+            // Step 2: Sirf parts (jo options wala text hai) uspar split chalaya
+            if (parts.length >= 2) {
+                const questionText = parts;
+                
+                // Comma se split karke khali spaces hataye
+                const optionsAndAns = parts.split(',').map(x => x.trim()).filter(Boolean);
 
-            // 2. Options aur Ans wale part ko comma se split karein
-            // filter(Boolean) khali values (jaise aakhri comma ke baad) ko hata dega
-            const optionsAndAns = parts.split(',').map(x => x.trim()).filter(Boolean);
-
-            // Humein kam se kam 4 options aur 1 answer chahiye (Total 5 items)
-            if (optionsAndAns.length >= 5) {
-                await addDoc(collection(db, "pyqQuestions"), {
-                    question: questionText,
-                    options: [
-                        optionsAndAns, 
-                        optionsAndAns, 
-                        optionsAndAns, 
-                        optionsAndAns
-                    ],
-                    answer: optionsAndAns, // Ye A, B, C ya D uthayega
-                    category: cat,
-                    post: post,
-                    createdAt: serverTimestamp()
-                });
-                successCount++;
-            } else {
-                console.warn("Skipping line due to incorrect comma format: ", cleanLine);
+                // Check ki kam se kam 4 options aur 1 answer (total 5) mil rahe hain
+                if (optionsAndAns.length >= 5) {
+                    await addDoc(collection(db, "pyqQuestions"), {
+                        question: questionText,
+                        options: [
+                            optionsAndAns, 
+                            optionsAndAns, 
+                            optionsAndAns, 
+                            optionsAndAns
+                        ],
+                        answer: optionsAndAns,
+                        category: cat,
+                        post: post,
+                        createdAt: serverTimestamp()
+                    });
+                    successCount++;
+                }
             }
         }
 
@@ -242,14 +243,15 @@ window.bulkSave = async function() {
             document.getElementById('bulk').value = "";
             loadAll();
         } else {
-            status("Format mismatch! Check karein: Sawal | A, B, C, D, Ans|", "red");
+            status("Format Check Karein: Sawal | A, B, C, D, Ans|", "red");
         }
 
     } catch (e) { 
-        console.error("Firebase Error:", e);
-        status("Upload Error: " + e.message, "red"); 
+        console.error("Error details:", e);
+        status("Error: " + e.message, "red"); 
     }
 };
+
 
 
 
