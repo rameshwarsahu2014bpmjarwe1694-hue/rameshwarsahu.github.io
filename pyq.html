@@ -312,21 +312,16 @@ serial:index+1
 
 /* START QUIZ */
 function startQuiz(){
-
-if(questions.length===0){
-alert("No Questions Found");
-return;
+    if(questions.length===0){
+        alert("No Questions Found");
+        return;
+    }
+    document.getElementById("startBtn").style.display="none";
+    document.getElementById("resultBox").style.display="none";
+    document.getElementById("quizBox").style.display="block";
+    showQuestion();
 }
 
-document.getElementById("startBtn").style.display="none";
-docfunctionument.getElementById("resultBox").style.display="none";
-document.getElementById("quizBox").style.display="block";
-
-showQuestion();
-}
-
-/* SHOW QUESTION */
- showQuestion(){
 /* SHOW QUESTION */
 function showQuestion(){
     const q = questions[current];
@@ -339,7 +334,6 @@ function showQuestion(){
     for(let i=0; i<4; i++){
         const letter = String.fromCharCode(65+i); // A, B, C, D
         const op = safe(q.options?.[i]);
-        // Yahan check hoga ki kya ye letter select kiya gaya hai
         const active = answers[current] === letter ? "selected" : "";
 
         html += `
@@ -359,7 +353,7 @@ function showQuestion(){
 
 /* ACTIONS */
 window.selectAns = function(letter){
-    answers[current] = letter; // Text ki jagah sirf 'A', 'B' save hoga
+    answers[current] = letter; 
     showQuestion();
 };
 
