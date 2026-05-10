@@ -3,37 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Candidate Syllabus</title>
+<title>Syllabus - Study Hub</title>
 <style>
-    /* Aapka original CSS */
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-    body{background:#f4f6f9;padding:20px;}
-    .container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
-    h1{text-align:center;margin-bottom:20px;color:#222;}
-    .top-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
-    input,select{padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none;width:100%;}
-    .card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px;}
-    .card h3{color:#111;margin-bottom:5px;}
-    .category{display:inline-block;padding:4px 10px;background:#007bff;color:#fff;font-size:12px;border-radius:20px;margin-bottom:8px;}
-    .file-tag{font-size:12px;color:#d9534f;font-weight:bold;margin:5px 0;}
-    .small{font-size:14px;color:#666;margin-top:6px;line-height:1.5;}
-    .download-btn{display:inline-block;margin-top:12px;padding:10px 14px;background:#28a745;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;border:none;}
+    /* Clean and Professional UI */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+    body{background:#f0f2f5;padding:15px;}
+    .container{max-width:800px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+    h1{text-align:center;margin-bottom:25px;color:#333;font-size:28px;}
+    .filters{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;}
+    input,select{padding:12px;border:1px solid #ddd;border-radius:10px;font-size:16px;outline:none;transition:0.3s;}
+    input:focus,select:focus{border-color:#007bff;box-shadow:0 0 5px rgba(0,123,255,0.2);}
+    .card{background:#fff;padding:20px;border:1px solid #eee;border-radius:12px;margin-bottom:15px;transition:0.3s;}
+    .card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.05);}
+    .card h3{color:#111;margin-bottom:8px;font-size:20px;}
+    .badge{display:inline-block;padding:5px 12px;background:#e7f1ff;color:#007bff;font-size:12px;font-weight:bold;border-radius:20px;margin-bottom:10px;}
+    .desc{color:#555;font-size:14px;line-height:1.5;margin-bottom:15px;}
+    .btn-pdf{display:inline-block;padding:12px 20px;background:#28a745;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;text-align:center;cursor:pointer;border:none;width:100%;}
+    .btn-pdf:hover{background:#218838;}
+    .loading{text-align:center;padding:50px;color:#666;font-weight:bold;}
+    @media(max-width:600px){.filters{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Candidate Syllabus</h1>
-    <div class="top-controls">
-        <select id="categoryFilter">
-            <option value="All">All Categories</option>
+    <h1>📚 Official Syllabus</h1>
+    
+    <div class="filters">
+        <select id="catFilter">
+            <option value="All">All Exams</option>
             <option value="MTS">MTS</option>
             <option value="Postman">Postman</option>
             <option value="PA/SA">PA/SA</option>
         </select>
-        <input type="text" id="searchBox" placeholder="Search syllabus...">
+        <input type="text" id="search" placeholder="Search topics...">
     </div>
-    <div id="list">Loading...</div>
+
+    <div id="syllabusList">
+        <div class="loading">Fetching Latest Syllabus...</div>
+    </div>
 </div>
 
 <script type="module">
@@ -54,75 +62,72 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const list = document.getElementById("list");
-const categoryFilter = document.getElementById("categoryFilter");
-const searchBox = document.getElementById("searchBox");
-
 const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
-let allData = [];
-let currentUserEmail = "";
+let syllabusData = [];
+let userEmail = "";
 
+// Auth Check for Secure Rendering
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        currentUserEmail = user.email;
-        loadData();
+        userEmail = user.email;
+        fetchSyllabus();
     } else {
         window.location.href = "login.html";
     }
 });
 
-async function loadData(){
-    try{
-        const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+async function fetchSyllabus() {
+    try {
+        const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
-        allData = [];
-        snap.forEach(doc=>{ allData.push({ id: doc.id, ...doc.data() }); });
-        renderData();
-    }catch(error){
-        list.innerHTML = `Error loading data.`;
+        syllabusData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderUI();
+    } catch (err) {
+        document.getElementById("syllabusList").innerHTML = "Failed to load syllabus.";
     }
 }
 
-function renderData(){
-    const category = categoryFilter.value;
-    const search = searchBox.value.toLowerCase().trim();
+function renderUI() {
+    const list = document.getElementById("syllabusList");
+    const cat = document.getElementById("catFilter").value;
+    const term = document.getElementById("search").value.toLowerCase();
 
-    let filtered = allData.filter(item=>{
-        let catMatch = category === "All" || item.category === category;
-        let textMatch = (item.title || "").toLowerCase().includes(search);
-        return catMatch && textMatch;
+    let filtered = syllabusData.filter(i => {
+        return (cat === "All" || i.category === cat) && 
+               (i.title.toLowerCase().includes(term));
     });
 
+    if(filtered.length === 0) {
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>No records found.</p>";
+        return;
+    }
+
     list.innerHTML = "";
-    filtered.forEach(item=>{
-        // Admin Panel se aane wala Exact File Name
+    filtered.forEach(item => {
+        // Galti Sudhar: Admin Panel se aane wala EXACT file name
         let fName = (item.fileName || "").trim();
+        
+        // GitHub Directory Check: Agar .pdf extension missing hai toh auto-add karo
+        if(fName && !fName.toLowerCase().endsWith(".pdf")) fName += ".pdf";
 
-        // 1. Agar .pdf extension missing hai toh add karo
-        if(fName && !fName.toLowerCase().endsWith(".pdf")){
-            fName += ".pdf";
-        }
-
-        // 2. BACKEND MATCH: 'year' ko small 'syllabus' karke dekho agar capital se nahi chal raha
-        // GitHub directory check: backend/pdfs/
-        const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Syllabus&post=${encodeURIComponent(fName)}`;
+        // Render Route matching your backend/pdfs/ directory
+        const secureLink = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(userEmail)}&year=Syllabus&post=${encodeURIComponent(fName)}`;
 
         list.innerHTML += `
         <div class="card">
-            <h3>${item.title || ""}</h3>
-            <div class="category">${item.category || ""}</div>
-            <div class="file-tag">📄 File: ${fName}</div>
-            <p class="small">${item.desc || ""}</p>
-            <button class="download-btn" onclick="window.open('${secureUrl}', '_blank')">
-                📄 Open PDF
+            <span class="badge">${item.category}</span>
+            <h3>${item.title}</h3>
+            <p class="desc">${item.desc || 'Latest updated exam pattern and syllabus.'}</p>
+            <button class="btn-pdf" onclick="window.open('${secureLink}', '_blank')">
+                📖 Open Syllabus PDF
             </button>
-        </div>
-        `;
+        </div>`;
     });
 }
 
-categoryFilter.addEventListener("change",renderData);
-searchBox.addEventListener("input",renderData);
+document.getElementById("catFilter").onchange = renderUI;
+document.getElementById("search").oninput = renderUI;
+
 </script>
 </body>
 </html>
