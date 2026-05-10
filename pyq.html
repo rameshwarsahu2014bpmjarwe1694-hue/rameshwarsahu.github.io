@@ -31,9 +31,15 @@
     <div class="selector-grid">
         <select id="yearSelect">
             <option value="">वर्ष चुनें</option>
-            <option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option>
-            <option>PYQ 2023</option><option>PYQ 2024</option><option>PYQ 2025</option>
-            <option>PYQ 2026</option><option>Model Paper</option><option>Practice Set</option>
+            <option>PYQ 2020</option>
+            <option>PYQ 2021</option>
+            <option>PYQ 2022</option>
+            <option>PYQ 2023</option>
+            <option>PYQ 2024</option>
+            <option>PYQ 2025</option>
+            <option>PYQ 2026</option>
+            <option>Model Paper</option>
+            <option>Practice Set</option>
         </select>
         <select id="postSelect">
             <option value="">पोस्ट चुनें</option>
@@ -43,8 +49,7 @@
 
     <div id="statusBox" class="status-bar"></div>
 
-    <div class="card" id="actionUI">
-        <input type="email" id="userEmail" placeholder="रजिस्टर्ड ईमेल डालें (PDF के लिए)" style="margin-bottom:10px;">
+    <div class="card" id="pdfSection">
         <button class="btn btn-open" id="openPdfBtn">Open PDF</button>
     </div>
 
@@ -162,12 +167,10 @@
     };
 
     document.getElementById("openPdfBtn").onclick = () => {
-        const email = document.getElementById("userEmail").value.trim();
         const year = document.getElementById("yearSelect").value;
         const post = document.getElementById("postSelect").value;
-        if(!email) return alert("Pehle email dalein!");
         if(!year || !post) return alert("Pehle Year aur Post select karein!");
-        const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
+        const url = `${BACKEND_URL}/get-pdf?year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
         window.open(url, "_blank");
     };
 
@@ -175,7 +178,7 @@
     document.getElementById("postSelect").onchange = fetchQuestions;
     document.getElementById("startQuizBtn").onclick = () => {
         if(allQuestions.length === 0) return alert("Pehle Year aur Post select karke load hone dein!");
-        document.getElementById("actionUI").style.display = "none";
+        document.getElementById("pdfSection").style.display = "none";
         document.getElementById("startQuizBtn").style.display = "none";
         document.getElementById("quizDisplay").style.display = "block";
         window.renderQuiz();
@@ -183,3 +186,4 @@
 </script>
 </body>
 </html>
+
