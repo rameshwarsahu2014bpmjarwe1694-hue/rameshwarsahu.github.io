@@ -5,44 +5,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Mock Test - Official Study</title>
     <style>
-        :root { --primary: #007bff; --success: #28a745; --warning: #ff9800; --dark: #2c3e50; --danger: #dc3545; }
+        :root { --primary: #007bff; --success: #28a745; --dark: #2c3e50; --danger: #dc3545; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: #f0f2f5; padding: 15px; color: #333; }
-        
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 22px; border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
-        
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: var(--dark); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .timer-box { background: var(--danger); color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-family: monospace; font-size: 18px; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .subject-card { background: #fafafa; border: 2px solid #ddd; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 14px; display: flex; align-items: center; justify-content: center; min-height: 80px; }
-        .subject-card:hover { border-color: var(--primary); background: #eef7ff; transform: translateY(-2px); }
-
-        .status-bar { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 5px; }
-        .loader { background: #e1f5fe; color: #01579b; }
-        .ok { background: #d4edda; color: #155724; }
-        .err { background: #f8d7da; color: #721c24; }
-
-        .card { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-top: 15px; }
-        .question-text { font-weight: bold; font-size: 16px; margin: 15px 0; color: var(--dark); }
-        
-        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-size: 15px; position: relative; }
-        .option input { margin-right: 10px; }
-        
-        .correct { background: #d4edda !important; border-color: #28a745 !important; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .subject-card { background: #fafafa; border: 2px solid #ddd; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; cursor: pointer; transition: 0.3s; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+        .subject-card:hover { border-color: var(--primary); background: #eef7ff; }
+        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
+        .correct { background: #d4edda !important; border-color: #28a745 !important; }
         .wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
-
-        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; flex: 1; font-size: 15px; }
-        .btn-prev { background: #6c757d; }
-        .btn-next { background: var(--dark); }
-        .btn-submit { background: var(--success); }
-        
-        .result-box { text-align: center; margin-top: 20px; }
-        .score-text { font-size: 35px; color: var(--primary); font-weight: bold; margin: 10px 0; }
-        
         .hide { display: none; }
     </style>
 </head>
@@ -50,203 +24,106 @@
 
 <div class="container">
     <div class="top-nav">
-        <button class="btn-back" onclick="goBack()">⬅ Back</button>
+        <button onclick="location.href='candidate-dashboard.html'" style="padding:8px; border-radius:8px; border:none; background:var(--dark); color:white; cursor:pointer;">⬅ Back</button>
         <div class="timer-box" id="timer">30:00</div>
     </div>
 
-    <h1>Mock Test Hub</h1>
-
-    <div id="statusBox" class="status-bar hide"></div>
-
     <div id="subjectBox">
-        <p style="text-align:center; font-weight:bold; color:#666;">विषय चुनें और टेस्ट शुरू करें:</p>
+        <h2 style="text-align:center; margin-bottom:15px;">Select Subject</h2>
         <div class="grid">
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOL 7</div>
-            <div class="subject-card" onclick="startQuiz('GK')">🌍 General Knowledge</div>
-            <div class="subject-card" onclick="startQuiz('Maths')">➕ Mathematics</div>
-            <div class="subject-card" onclick="startQuiz('Reasoning')">🧠 Reasoning</div>
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 5')">📘 POSTAL MANUAL VOL 5</div>
-            <div class="subject-card" onclick="startQuiz('Post Office Guide 1')">📮 PO GUIDE 1</div>
-            <div class="subject-card" onclick="startQuiz('Post Office Guide 2')">📮 PO GUIDE 2</div>
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 6 PART 3')">📘 VOL 6 PART 3</div>
+            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">VOL 7</div>
+            <div class="subject-card" onclick="startQuiz('GK')">GK</div>
+            <div class="subject-card" onclick="startQuiz('Maths')">Maths</div>
+            <div class="subject-card" onclick="startQuiz('Post Office Guide 1')">PO Guide 1</div>
         </div>
     </div>
 
     <div id="quizBox" class="hide">
-        <div class="card">
-            <span id="progress" style="color:var(--danger); font-weight:bold; font-size:14px;"></span>
-            <div class="question-text" id="question"></div>
-            <div id="options"></div>
-            
-            <div class="btn-row">
-                <button class="btn btn-prev" onclick="prevQ()">Previous</button>
-                <button class="btn btn-next" id="nextBtn" onclick="nextQ()">Next</button>
-                <button class="btn btn-submit hide" id="submitBtn" onclick="submitQuiz()">Submit Test</button>
-            </div>
+        <div id="progress" style="font-weight:bold; color:red; margin-bottom:10px;"></div>
+        <div id="question" style="font-weight:bold; font-size:18px; margin-bottom:15px;"></div>
+        <div id="options"></div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn" style="flex:1; padding:10px; background:#6c757d; color:white; border:none; border-radius:8px;" onclick="prevQ()">Previous</button>
+            <button id="nextBtn" style="flex:1; padding:10px; background:var(--dark); color:white; border:none; border-radius:8px;" onclick="nextQ()">Next</button>
+            <button id="submitBtn" class="hide" style="flex:1; padding:10px; background:var(--success); color:white; border:none; border-radius:8px;" onclick="submitQuiz()">Submit</button>
         </div>
     </div>
 
-    <div id="resultArea" class="hide card result-box">
-        <h3>📊 आपका परिणाम</h3>
-        <div class="score-text" id="resultScore"></div>
-        <button class="btn" style="background:var(--primary); width:100%;" onclick="location.reload()">Restart New Test</button>
+    <div id="resultArea" class="hide" style="text-align:center;">
+        <h3>Your Score</h3>
+        <div id="resultScore" style="font-size:40px; color:var(--primary); font-weight:bold;"></div>
+        <button onclick="location.reload()" style="width:100%; padding:12px; margin-top:15px; border-radius:8px; border:none; background:var(--primary); color:white;">Restart</button>
     </div>
-
-    <div id="debug" style="font-size:10px; color:red; margin-top:10px;"></div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-    projectId: "gds-departmental-exam-studyhub",
-    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-    messagingSenderId: "759916756080",
-    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+        authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+        projectId: "gds-departmental-exam-studyhub",
+        storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+        messagingSenderId: "759916756080",
+        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-let user = null;
-let subject = "";
-let questions = [];
-let current = 0;
-let answers = {};
-let submitted = false;
-let sec = 1800;
-let timerInt = null;
+    let questions = [];
+    let current = 0;
+    let answers = {};
+    let submitted = false;
 
-onAuthStateChanged(auth, (u) => {
-    if (u) {
-        user = u;
-        msg("User Authenticated", "ok");
-    } else {
-        msg("Please login first", "err");
-        setTimeout(() => location.href = "login.html", 1500);
-    }
-});
-
-window.startQuiz = async function(sub) {
-    subject = sub;
-    msg("लोड हो रहा है: " + sub + "...", "loader");
-
-    try {
+    window.startQuiz = async function(sub) {
         const qy = query(collection(db, "quizQuestions"), where("subject", "==", sub));
         const snap = await getDocs(qy);
-        questions = [];
-        snap.forEach(doc => questions.push(doc.data()));
-
-        if (questions.length === 0) {
-            msg("इस विषय के लिए कोई सवाल नहीं मिले।", "err");
-            return;
+        questions = snap.docs.map(doc => doc.data());
+        
+        if(questions.length > 0) {
+            document.getElementById("subjectBox").classList.add("hide");
+            document.getElementById("quizBox").classList.remove("hide");
+            render();
+        } else {
+            alert("No questions found for this subject.");
         }
+    };
 
-        document.getElementById("subjectBox").classList.add("hide");
-        document.getElementById("statusBox").classList.add("hide");
-        document.getElementById("quizBox").classList.remove("hide");
-
-        current = 0; answers = {}; submitted = false; sec = 1800;
-        startTimer();
-        render();
-    } catch (e) {
-        msg("Error: " + e.message, "err");
+    function render() {
+        let q = questions[current];
+        document.getElementById("progress").innerText = `Q: ${current + 1} / ${questions.length}`;
+        document.getElementById("question").innerText = q.question;
+        
+        let html = "";
+        q.options.forEach(op => {
+            let cls = "option";
+            if (submitted) {
+                if (op === q.answer) cls += " correct";
+                else if (answers[current] === op) cls += " wrong";
+            }
+            html += `<div class="${cls}" onclick="saveAns('${op.replace(/'/g, "\\'")}')">${op}</div>`;
+        });
+        document.getElementById("options").innerHTML = html;
+        
+        document.getElementById("nextBtn").classList.toggle("hide", current === questions.length - 1);
+        document.getElementById("submitBtn").classList.toggle("hide", current !== questions.length - 1 || submitted);
     }
-};
 
-function startTimer() {
-    clearInterval(timerInt);
-    timerInt = setInterval(() => {
-        sec--;
-        let m = Math.floor(sec / 60);
-        let s = sec % 60;
-        document.getElementById("timer").innerText = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-        if (sec <= 0) { clearInterval(timerInt); submitQuiz(); }
-    }, 1000);
-}
+    window.saveAns = (v) => { if(!submitted) { answers[current] = v; render(); } };
+    window.nextQ = () => { if(current < questions.length-1) { current++; render(); } };
+    window.prevQ = () => { if(current > 0) { current--; render(); } };
+    window.submitQuiz = () => {
+        submitted = true;
+        let score = 0;
+        questions.forEach((q, i) => { if(answers[i] === q.answer) score++; });
+        document.getElementById("quizBox").classList.add("hide");
+        document.getElementById("resultArea").classList.remove("hide");
+        document.getElementById("resultScore").innerText = `${score} / ${questions.length}`;
+    };
 
-window.render = function() {
-    let q = questions[current];
-    document.getElementById("progress").innerText = `प्रश्न: ${current + 1} / ${questions.length}`;
-    document.getElementById("question").innerText = q.question;
-
-    let html = "";
-    q.options.forEach(op => {
-        let isSelected = answers[current] === op;
-        let cls = "option";
-        if (submitted) {
-            if (op === q.answer) cls += " correct";
-            else if (isSelected) cls += " wrong";
-        }
-        html += `
-            <div class="${cls}" onclick="${submitted ? '' : `saveAns('${esc(op)}')`}">
-                <input type="radio" name="qOpt" ${isSelected ? "checked" : ""} ${submitted ? "disabled" : ""}>
-                ${op}
-            </div>
-        `;
-    });
-    document.getElementById("options").innerHTML = html;
-
-    // Button controls
-    document.getElementById("submitBtn").classList.toggle("hide", current !== questions.length - 1);
-    document.getElementById("nextBtn").classList.toggle("hide", current === questions.length - 1);
-};
-
-window.saveAns = function(v) {
-    answers[current] = v;
-    render();
-};
-
-window.nextQ = function() { if (current < questions.length - 1) { current++; render(); } };
-window.prevQ = function() { if (current > 0) { current--; render(); } };
-
-window.submitQuiz = async function() {
-    if (submitted) return;
-    if (!confirm("क्या आप टेस्ट सबमिट करना चाहते हैं?")) return;
-
-    submitted = true;
-    clearInterval(timerInt);
-    let score = 0;
-    questions.forEach((q, i) => { if (answers[i] === q.answer) score++; });
-
-    render();
-    document.getElementById("quizBox").classList.add("hide");
-    document.getElementById("resultArea").classList.remove("hide");
-    document.getElementById("resultScore").innerText = `${score} / ${questions.length}`;
-
-    if (user) {
-        try {
-            await addDoc(collection(db, "results"), {
-                uid: user.uid,
-                email: user.email,
-                subject: subject,
-                score: score,
-                total: questions.length,
-                createdAt: serverTimestamp()
-            });
-        } catch (e) { console.error("Error saving result", e); }
-    }
-};
-
-window.goBack = function() {
-    if (confirm("Exit test?")) {
-        window.location.href = "candidate-dashboard.html";
-    }
-};
-
-function msg(t, type) {
-    const b = document.getElementById("statusBox");
-    b.className = "status-bar " + type;
-    b.innerText = t;
-    b.classList.remove("hide");
-}
-
-function esc(str) { return String(str).replace(/'/g, "\\'"); }
+    document.addEventListener("contextmenu", e => e.preventDefault());
 </script>
 </body>
 </html>
