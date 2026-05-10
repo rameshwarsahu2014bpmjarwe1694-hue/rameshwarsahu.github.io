@@ -15,8 +15,6 @@
         .status-bar { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 5px; display: none; }
         .card { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-top: 15px; }
         .btn { padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; width: 100%; font-size: 16px; margin-top: 8px; }
-        .btn-pay { background: var(--warning); text-decoration: none; display: block; text-align: center; }
-        .btn-request { background: var(--success); }
         .btn-open { background: var(--primary); }
         .btn-start { background: #6f42c1; width: 100%; margin-top: 15px; }
         .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
@@ -34,7 +32,8 @@
         <select id="yearSelect">
             <option value="">वर्ष चुनें</option>
             <option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option>
-            <option>PYQ 2023</option><option>PYQ 2024</option>
+            <option>PYQ 2023</option><option>PYQ 2024</option><option>PYQ 2025</option>
+            <option>PYQ 2026</option><option>Model Paper</option><option>Practice Set</option>
         </select>
         <select id="postSelect">
             <option value="">पोस्ट चुनें</option>
@@ -44,6 +43,8 @@
 
     <div id="statusBox" class="status-bar"></div>
 
+    <div class="card" id="actionUI">
+        <input type="email" id="userEmail" placeholder="रजिस्टर्ड ईमेल डालें (PDF के लिए)" style="margin-bottom:10px;">
         <button class="btn btn-open" id="openPdfBtn">Open PDF</button>
     </div>
 
@@ -75,7 +76,6 @@
     let score = 0;
     let quizHistory = {}; 
 
-    // --- FETCH QUESTIONS ---
     async function fetchQuestions() {
         const year = document.getElementById("yearSelect").value;
         const post = document.getElementById("postSelect").value;
@@ -102,7 +102,6 @@
         } catch (error) { status.innerHTML = "⚠️ Error loading data."; }
     }
 
-    // --- RENDER QUIZ (Includes Submit & Previous) ---
     window.renderQuiz = function() {
         const quizDisplay = document.getElementById("quizDisplay");
         const q = allQuestions[currentIdx];
@@ -162,75 +161,21 @@
                         <button class="btn" style="background:var(--primary); width:100%;" onclick="location.reload()">Restart Quiz</button>`;
     };
 
-    // --- RENDER BACKEND REQUEST ---
-    // --- RENDER BACKEND REQUEST (FIXED FOR CONNECTION) ---
-document.getElementById("reqBtn").onclick = async () => {
-    const email = document.getElementById("userEmail").value.trim();
-    const txnId = document.getElementById("txnId").value.trim();
-    const reqBtn = document.getElementById("reqBtn");
-
-    if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
-    
-    reqBtn.innerText = "Connecting..."; // Step 1: Connecting dikhayega
-    reqBtn.disabled = true;
-
-    try {
-        // Render free tier kabhi-kabhi sleep ho jata hai, isliye timeout badha diya hai
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds wait
-
-        const res = await fetch(`${BACKEND_URL}/request-access`, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({ email: email, txnId: txnId }),
-            signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if(res.ok) {
-            alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
-            reqBtn.innerText = "Request Sent";
-            reqBtn.style.background = "#28a745"; // Success color
-        } else {
-            const errorText = await res.text();
-            alert("❌ Server Error: " + errorText);
-            reqBtn.innerText = "Retry Access";
-            reqBtn.disabled = false;
-        }
-    } catch(err) {
-        console.error("Backend Error:", err);
-        // Agar Render server band hai ya slow hai toh ye alert aayega
-        alert("⚠️ Backend Server se connection nahi ho paa raha hai. Kripya 30 seconds baad phir se koshish karein kyunki Render server 'Wake up' ho raha hai.");
-        reqBtn.innerText = "Request Access";
-        reqBtn.disabled = false;
-    }
-};
-
-
     document.getElementById("openPdfBtn").onclick = () => {
-    const email = document.getElementById("userEmail").value.trim();
-    const year = document.getElementById("yearSelect").value;
-    const post = document.getElementById("postSelect").value;
-
-    if(!email) return alert("Pehle email dalein!");
-    if(!year || !post) return alert("Pehle Year aur Post select karein!");
-
-    // Ab email ke saath Year aur Post bhi backend ko jayega
-    const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
-    
-    window.open(url, "_blank");
-};
-
+        const email = document.getElementById("userEmail").value.trim();
+        const year = document.getElementById("yearSelect").value;
+        const post = document.getElementById("postSelect").value;
+        if(!email) return alert("Pehle email dalein!");
+        if(!year || !post) return alert("Pehle Year aur Post select karein!");
+        const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
+        window.open(url, "_blank");
+    };
 
     document.getElementById("yearSelect").onchange = fetchQuestions;
     document.getElementById("postSelect").onchange = fetchQuestions;
     document.getElementById("startQuizBtn").onclick = () => {
         if(allQuestions.length === 0) return alert("Pehle Year aur Post select karke load hone dein!");
-        document.getElementById("paymentUI").style.display = "none";
+        document.getElementById("actionUI").style.display = "none";
         document.getElementById("startQuizBtn").style.display = "none";
         document.getElementById("quizDisplay").style.display = "block";
         window.renderQuiz();
