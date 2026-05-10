@@ -4,27 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Candidate Syllabus</title>
-
 <style>
-/* CSS वही पुराना है */
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-body{background:#f4f6f9;padding:20px;}
-.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
-h1{text-align:center;margin-bottom:20px;color:#222;}
-.top-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
-input,select{padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none;width:100%;}
-.card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px;}
-.card h3{color:#111;margin-bottom:5px;}
-.category{display:inline-block;padding:4px 10px;background:#007bff;color:#fff;font-size:12px;border-radius:20px;margin-bottom:8px;}
-.file-tag{font-size:12px;color:#d9534f;font-weight:bold;margin:5px 0;}
-.small{font-size:14px;color:#666;margin-top:6px;line-height:1.5;}
-.download-btn{display:inline-block;margin-top:12px;padding:10px 14px;background:#28a745;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;border:none;}
-.empty{text-align:center;padding:25px;color:#666;font-weight:bold;}
-@media(max-width:700px){.top-controls{grid-template-columns:1fr;}}
+    /* Aapka original CSS */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+    body{background:#f4f6f9;padding:20px;}
+    .container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
+    h1{text-align:center;margin-bottom:20px;color:#222;}
+    .top-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+    input,select{padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none;width:100%;}
+    .card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px;}
+    .card h3{color:#111;margin-bottom:5px;}
+    .category{display:inline-block;padding:4px 10px;background:#007bff;color:#fff;font-size:12px;border-radius:20px;margin-bottom:8px;}
+    .file-tag{font-size:12px;color:#d9534f;font-weight:bold;margin:5px 0;}
+    .small{font-size:14px;color:#666;margin-top:6px;line-height:1.5;}
+    .download-btn{display:inline-block;margin-top:12px;padding:10px 14px;background:#28a745;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;border:none;}
 </style>
 </head>
-
 <body>
+
 <div class="container">
     <h1>Candidate Syllabus</h1>
     <div class="top-controls">
@@ -82,7 +79,7 @@ async function loadData(){
         snap.forEach(doc=>{ allData.push({ id: doc.id, ...doc.data() }); });
         renderData();
     }catch(error){
-        list.innerHTML = `<div class="empty">लोड करने में विफल</div>`;
+        list.innerHTML = `Error loading data.`;
     }
 }
 
@@ -96,17 +93,18 @@ function renderData(){
         return catMatch && textMatch;
     });
 
-    if(filtered.length === 0){
-        list.innerHTML = `<div class="empty">कोई डेटा नहीं मिला</div>`;
-        return;
-    }
-
     list.innerHTML = "";
     filtered.forEach(item=>{
-        // Admin Panel से आने वाला exact File Name
+        // Admin Panel se aane wala Exact File Name
         let fName = (item.fileName || "").trim();
 
-        // बैकएंड को फाइल भेजने का सुरक्षित URL
+        // 1. Agar .pdf extension missing hai toh add karo
+        if(fName && !fName.toLowerCase().endsWith(".pdf")){
+            fName += ".pdf";
+        }
+
+        // 2. BACKEND MATCH: 'year' ko small 'syllabus' karke dekho agar capital se nahi chal raha
+        // GitHub directory check: backend/pdfs/
         const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Syllabus&post=${encodeURIComponent(fName)}`;
 
         list.innerHTML += `
