@@ -170,41 +170,121 @@ function startTimer() {
     }, 1000);
 }
 
+let sectionScore = 0;
+
 window.render = function() {
     let q = questions[current];
-    document.getElementById("progress").innerText = `प्रश्न: ${current + 1} / ${questions.length}`;
+
+    document.getElementById("progress").innerText =
+        `प्रश्न: ${current + 1} / ${questions.length}`;
+
     document.getElementById("question").innerText = q.question;
 
     let html = "";
+
     q.options.forEach(op => {
         let isSelected = answers[current] === op;
+
         let cls = "option";
+
         if (submitted) {
             if (op === q.answer) cls += " correct";
             else if (isSelected) cls += " wrong";
         }
+
         html += `
-            <div class="${cls}" onclick="${submitted ? '' : `saveAns('${esc(op)}')`}">
-                <input type="radio" name="qOpt" ${isSelected ? "checked" : ""} ${submitted ? "disabled" : ""}>
+            <div class="${cls}"
+                 onclick="${submitted ? '' : `saveAns('${esc(op)}')`}">
+
+                <input type="radio"
+                       name="qOpt"
+                       ${isSelected ? "checked" : ""}
+                       ${submitted ? "disabled" : ""}>
+
                 ${op}
             </div>
         `;
     });
+
     document.getElementById("options").innerHTML = html;
 
-    // Button controls
-    document.getElementById("submitBtn").classList.toggle("hide", current !== questions.length - 1);
-    document.getElementById("nextBtn").classList.toggle("hide", current === questions.length - 1);
+    // ===== BUTTON CONTROL =====
+
+    let isReviewPoint =
+        (current + 1) % 10 === 0 || current === questions.length - 1;
+
+    document.getElementById("submitBtn")
+        .classList.toggle("hide", !isReviewPoint);
+
+    document.getElementById("nextBtn")
+        .classList.toggle("hide", isReviewPoint);
 };
 
-window.saveAns = function(v) {
-    answers[current] = v;
-    render();
+
+window.submitQuiz = async function() {
+
+    let start = Math.floor(current / 10) * 10;
+    let end = current;
+
+    let score = 0;
+
+    for (let i = start; i <= end; i++) {
+        if (answers[i] === questions[i].answer) {
+            score++;
+        }
+    }
+
+    alert(
+        `Questions ${start + 1} - ${end + 1}\n\n` +
+        `Your Score: ${score} / ${end - start + 1}`
+    );
+
+    // LAST QUESTION = FINAL RESULT
+    if (current === questions.length - 1) {
+
+        submitted = true;
+        clearInterval(timerInt);
+
+        let finalScore = 0;
+
+        questions.forEach((q, i) => {
+            if (answers[i] === q.answer) {
+                finalScore++;
+            }
+        });
+
+        document.getElementById("quizBox")
+            .classList.add("hide");
+
+        document.getElementById("resultArea")
+            .classList.remove("hide");
+
+        document.getElementById("resultScore")
+            .innerText = `${finalScore} / ${questions.length}`;
+
+        if (user) {
+            try {
+                await addDoc(collection(db, "results"), {
+                    uid: user.uid,
+                    email: user.email,
+                    subject: subject,
+                    score: finalScore,
+                    total: questions.length,
+                    createdAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Error saving result", e);
+            }
+        }
+
+    } else {
+
+        // Next Question after review
+        current++;
+
+        render();
+    }
 };
-
-window.nextQ = function() { if (current < questions.length - 1) { current++; render(); } };
-window.prevQ = function() { if (current > 0) { current--; render(); } };
-
 window.submitQuiz = async function() {
     if (submitted) return;
     if (!confirm("क्या आप टेस्ट सबमिट करना चाहते हैं?")) return;
