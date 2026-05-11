@@ -108,7 +108,8 @@ const firebaseConfig = {
     messagingSenderId: "759916756080",
     appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
-
+    
+const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -135,17 +136,20 @@ onAuthStateChanged(auth, (u) => {
 window.startQuiz = async function(sub) {
     subject = sub;
     msg("लोड हो रहा है: " + sub + "...", "loader");
+    
+            try {
+        // Backend se data mangwane ke liye
+        const response = await fetch(`${BACKEND_URL}/api/questions?subject=${encodeURIComponent(sub)}`);
+        
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        questions = await response.json();
 
-    try {
-        const qy = query(collection(db, "quizQuestions"), where("subject", "==", sub));
-        const snap = await getDocs(qy);
-        questions = [];
-        snap.forEach(doc => questions.push(doc.data()));
-
-        if (questions.length === 0) {
-            msg("इस विषय के लिए कोई सवाल नहीं मिले।", "err");
+        if (!questions || questions.length === 0) {
+            msg("No questions found for " + sub, "err");
             return;
         }
+
 
         document.getElementById("subjectBox").classList.add("hide");
         document.getElementById("statusBox").classList.add("hide");
@@ -219,19 +223,27 @@ window.submitQuiz = async function() {
     document.getElementById("resultArea").classList.remove("hide");
     document.getElementById("resultScore").innerText = `${score} / ${questions.length}`;
 
-    if (user) {
+        if (user) {
         try {
-            await addDoc(collection(db, "results"), {
-                uid: user.uid,
-                email: user.email,
-                subject: subject,
-                score: score,
-                total: questions.length,
-                createdAt: serverTimestamp()
+            await fetch(`${BACKEND_URL}/api/save-result`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    subject: subject,
+                    score: score,
+                    total: questions.length,
+                    timestamp: new Date().toISOString()
+                })
             });
-        } catch (e) { console.error("Error saving result", e); }
+            msg("Result Synced with Backend ✅", "ok");
+        } catch (e) {
+            console.error("Backend Error:", e);
+            msg("Result saved locally only.", "err");
+        }
     }
-};
+
 
 window.goBack = function() {
     if (confirm("Exit test?")) {
