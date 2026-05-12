@@ -140,10 +140,20 @@ const file = params.get("file");
 // ==========================
 
 const pdfUrl =
-decodeURIComponent(
-    new URLSearchParams(window.location.search)
-    .get("pdf")
-);
+const params =
+new URLSearchParams(window.location.search);
+
+const year =
+params.get("year");
+
+const post =
+params.get("post");
+
+const email =
+params.get("email");
+
+const pdfUrl =
+`https://payment-backend-2-g6go.onrender.com/get-pdf?email=${encodeURIComponent(email)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
 
 
 // ==========================
