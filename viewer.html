@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Protected PDF Viewer</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    background:#111;
+    overflow:hidden;
+    font-family:Arial;
+}
+
+#pdf-container{
+    height:100vh;
+    overflow:auto;
+    text-align:center;
+}
+
+canvas{
+    display:block;
+    margin:10px auto;
+}
+
+.watermark{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:45px;
+    color:rgba(255,255,255,0.08);
+    z-index:9999;
+    pointer-events:none;
+    user-select:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="watermark">
+Rameshwar Sahu | GDS Departmental Study Hub
+</div>
+
+<div id="pdf-container"></div>
+
+<script>
+
+// =======================
+// EXISTING PDF URL
+// =======================
+
+const pdfUrl =
+"https://YOUR-EXISTING-PDF-LINK.pdf";
+
+
+// Disable Right Click
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+
+// Disable CTRL Keys
+document.addEventListener("keydown", function(e){
+
+    if(
+        e.ctrlKey &&
+        (
+            e.key === "s" ||
+            e.key === "p" ||
+            e.key === "u"
+        )
+    ){
+        e.preventDefault();
+    }
+
+});
+
+
+// Disable Print
+window.print = function(){};
+
+
+// Load PDF
+pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
+
+    const container =
+    document.getElementById("pdf-container");
+
+    for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
+
+        const page = await pdf.getPage(pageNum);
+
+        const viewport =
+        page.getViewport({ scale: 1.5 });
+
+        const canvas =
+        document.createElement("canvas");
+
+        const context =
+        canvas.getContext("2d");
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        container.appendChild(canvas);
+
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+
+    }
+
+});
+
+
+// Screenshot Warning
+document.addEventListener("keyup", function(e){
+
+    if(e.key === "PrintScreen"){
+
+        alert("Screenshot Restricted");
+
+        navigator.clipboard.writeText("");
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
