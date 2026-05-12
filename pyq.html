@@ -385,11 +385,10 @@ window.nav = function(step) {
     if(!year || !post)
         return alert("Pehle Year aur Post select karein!");
 
-    // PDF filename generate
-    const viewerURL =
-`viewer.html?year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}&email=${encodeURIComponent(currentUserEmail)}`;
+    const url =
+`${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
 
-window.open(viewerURL, "_blank");
+    window.open(url, "_blank");
 
 };
 
