@@ -26,6 +26,7 @@ body{
 canvas{
     display:block;
     margin:10px auto;
+    max-width:100%;
 }
 
 .watermark{
@@ -33,11 +34,30 @@ canvas{
     top:50%;
     left:50%;
     transform:translate(-50%,-50%) rotate(-30deg);
+
     font-size:45px;
+
     color:rgba(255,255,255,0.08);
+
     z-index:9999;
+
     pointer-events:none;
+
     user-select:none;
+
+    text-align:center;
+}
+
+.topbar{
+    position:fixed;
+    top:0;
+    width:100%;
+    background:#000;
+    color:white;
+    padding:10px;
+    z-index:99999;
+    text-align:center;
+    font-size:14px;
 }
 
 </style>
@@ -45,27 +65,50 @@ canvas{
 
 <body>
 
+<div class="topbar">
+Protected PDF Viewer
+</div>
+
 <div class="watermark">
-Rameshwar Sahu | GDS Departmental Study Hub
+Rameshwar Sahu<br>
+GDS Departmental Study Hub
 </div>
 
 <div id="pdf-container"></div>
 
 <script>
 
-// =======================
-// EXISTING PDF URL
-// =======================
+// ==========================
+// GET PDF NAME
+// ==========================
+
+const params = new URLSearchParams(window.location.search);
+
+const file = params.get("file");
+
+
+// ==========================
+// RENDER PDF URL
+// ==========================
 
 const pdfUrl =
-"https://YOUR-EXISTING-PDF-LINK.pdf";
+`https://payment-backend-2-g6go.onrender.com/uploads/${file}`;
 
 
+
+// ==========================
 // Disable Right Click
-document.addEventListener("contextmenu", e => e.preventDefault());
+// ==========================
+
+document.addEventListener("contextmenu", e =>
+e.preventDefault());
 
 
-// Disable CTRL Keys
+
+// ==========================
+// Disable Keys
+// ==========================
+
 document.addEventListener("keydown", function(e){
 
     if(
@@ -82,11 +125,19 @@ document.addEventListener("keydown", function(e){
 });
 
 
+
+// ==========================
 // Disable Print
+// ==========================
+
 window.print = function(){};
 
 
+
+// ==========================
 // Load PDF
+// ==========================
+
 pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
 
     const container =
@@ -94,7 +145,8 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
 
     for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
 
-        const page = await pdf.getPage(pageNum);
+        const page =
+        await pdf.getPage(pageNum);
 
         const viewport =
         page.getViewport({ scale: 1.5 });
@@ -106,6 +158,7 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
         canvas.getContext("2d");
 
         canvas.height = viewport.height;
+
         canvas.width = viewport.width;
 
         container.appendChild(canvas);
@@ -117,10 +170,20 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
 
     }
 
+}).catch(err => {
+
+    alert("PDF not found");
+
+    console.log(err);
+
 });
 
 
+
+// ==========================
 // Screenshot Warning
+// ==========================
+
 document.addEventListener("keyup", function(e){
 
     if(e.key === "PrintScreen"){
