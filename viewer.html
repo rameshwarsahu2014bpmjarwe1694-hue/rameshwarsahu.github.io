@@ -92,8 +92,10 @@ const file = params.get("file");
 // ==========================
 
 const pdfUrl =
-`https://payment-backend-2-g6go.onrender.com/uploads/${file}`;
-
+decodeURIComponent(
+    new URLSearchParams(window.location.search)
+    .get("pdf")
+);
 
 
 // ==========================
