@@ -197,7 +197,72 @@ document.addEventListener("keyup", function(e){
     }
 
 });
+// ==========================
+// Blur when tab inactive
+// ==========================
 
+document.addEventListener("visibilitychange", () => {
+
+    const container =
+    document.getElementById("pdf-container");
+
+    if(document.hidden){
+
+        container.style.filter = "blur(20px)";
+
+    } else {
+
+        container.style.filter = "blur(0px)";
+    }
+
+});
+
+
+// ==========================
+// Detect DevTools
+// ==========================
+
+setInterval(() => {
+
+    if(
+        window.outerWidth - window.innerWidth > 160 ||
+        window.outerHeight - window.innerHeight > 160
+    ){
+
+        document.body.innerHTML = `
+            <div style="
+                color:white;
+                height:100vh;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                font-size:24px;
+                background:black;
+            ">
+                Inspection Blocked
+            </div>
+        `;
+    }
+
+}, 1000);
+
+
+// ==========================
+// Floating Dynamic Watermark
+// ==========================
+
+setInterval(() => {
+
+    const wm =
+    document.querySelector(".watermark");
+
+    wm.style.top =
+    Math.random() * 80 + "%";
+
+    wm.style.left =
+    Math.random() * 80 + "%";
+
+}, 3000);
 </script>
 
 </body>
