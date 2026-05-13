@@ -114,15 +114,18 @@
     let quizHistory = {}; 
     let currentUserEmail = "";
 
-    // Login logic
+        // Strict Login Guard
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUserEmail = user.email;
+            console.log("Access Granted for:", currentUserEmail);
         } else {
-            alert("Security Alert: Please login first!");
+            // Agar login nahi hai toh turant bahar bhejo
             window.location.href = "login.html"; 
+            alert("Security Alert: Is page ke liye login zaroori hai!");
         }
     });
+
 
     async function fetchQuestions() {
         const year = document.getElementById("yearSelect").value;
