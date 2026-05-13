@@ -1,6 +1,7 @@
 {
-  "name": "GDS Departmental Exam Study Hub",
-  "short_name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
+  "id": "gds-study-app",
+  "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
+  "short_name": "GDS Notes",
   "description": "Complete GDS Departmental Exam Notes, Mock Tests, PDF Study Material and Practice Platform",
   "start_url": "./",
   "scope": "/GDS-DEPARTMETAL-EXAM-NOTES/",
@@ -8,6 +9,7 @@
   "background_color": "#ffffff",
   "theme_color": "#8d151a",
   "orientation": "portrait",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "icon-192.png",
