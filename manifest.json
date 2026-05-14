@@ -4,8 +4,8 @@
   "short_name": "GDS Notes",
   "description": "Complete GDS Departmental Exam Notes",
 
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "/gdsnotes/index.html",
+"scope": "/gdsnotes/"
 
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
