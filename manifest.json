@@ -1,10 +1,10 @@
 {
-  "id": "com.io.gdsnotes.rshtwa",
+  "id": "com.io.github.rsh.twa",
   "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
   "short_name": "GDS Notes",
   "description": "Complete GDS Departmental Exam Notes, Study Material and Mock Tests.",
-  "start_url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/",
-  "scope": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/",
+  "start_url": "/",
+  "scope": "/",
   "display": "fullscreen",
   "display_override": [
     "fullscreen",
@@ -22,13 +22,13 @@
   ],
   "icons": [
     {
-      "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -36,21 +36,21 @@
   ],
   "screenshots": [
     {
-      "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/Screenshots1dashboard.jpg",
+      "src": "/Screenshots1dashboard.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "GDS Notes Dashboard"
     },
     {
-      "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/Screenshotpyq.jpg",
+      "src": "/Screenshotpyq.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Previous Year Questions"
     },
     {
-      "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/Screenshotsquiz.jpg",
+      "src": "/Screenshotsquiz.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
