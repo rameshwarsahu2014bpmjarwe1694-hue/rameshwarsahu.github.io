@@ -83,48 +83,24 @@ cursor:pointer;
 
 <script>
 
-// LOGIN FUNCTION (OLD STYLE SAFE)
-async function candidateLogin() {
+
+window.resetPassword = function () {
 
   const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
 
-  if(!email || !password){
-    alert("Enter email & password");
+  if (!email) {
+    alert("Please enter your registered email first.");
     return;
   }
 
-  try {
-
-    await window.signInWithEmailAndPassword(
-      window.auth,
-      email,
-      password
-    );
-
-    alert("Login Success");
-    window.location.href = "pyq.html";
-
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-// RESET PASSWORD (CLEAN OLD STYLE)
-window.resetPassword = function () {
-
-  let email = document.getElementById("loginEmail").value.trim();
-
-  if(email === ""){
-    alert("Please enter your registered email first.");
+  if (!window.sendPasswordResetEmail) {
+    alert("System not ready. Please refresh page.");
     return;
   }
 
   window.sendPasswordResetEmail(window.auth, email)
   .then(() => {
-    alert(
-      "Password reset link sent.\n\nCheck Inbox + Spam folder."
-    );
+    alert("Password reset link sent.\nCheck Inbox + Spam folder.");
   })
   .catch((error) => {
     alert(error.message);
