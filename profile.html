@@ -292,49 +292,121 @@ body::after{
 
 </div>
 
-<script>
+<!-- FIREBASE PROFILE CONNECT -->
+<script type="module">
 
-/* =========================
-   Dynamic View Counter
-========================= */
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-let count = localStorage.getItem("profileViews");
-
-if(count === null){
-    count = 1;
-}else{
-    count = parseInt(count) + 1;
+import {
+    getAuth,
+    onAuthStateChanged
 }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-localStorage.setItem("profileViews", count);
-
-document.getElementById("viewCount").innerText = count;
-
-
-/* =========================
-   Load Saved Name
-========================= */
-
-let savedName = localStorage.getItem("candidateName");
-
-if(savedName){
-    document.getElementById("candidateName").innerText = savedName;
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
 }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+
+    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+
+    projectId: "gds-departmental-exam-studyhub",
+
+    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+
+    messagingSenderId: "759916756080",
+
+    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+
+};
+
+/* INIT */
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
 
 
-/* =========================
-   Change Candidate Name
-========================= */
+/* LOAD USER */
 
-function changeName(){
+onAuthStateChanged(auth, async(user)=>{
+
+    if(user){
+
+        const userRef = doc(db,"candidates",user.uid);
+
+        const snap = await getDoc(userRef);
+
+        if(snap.exists()){
+
+            const data = snap.data();
+
+            document.getElementById("candidateName").innerText =
+            data.name || user.email.split("@")[0];
+
+        }else{
+
+            const defaultName = user.email.split("@")[0];
+
+            await setDoc(userRef,{
+                name: defaultName,
+                email:user.email
+            });
+
+            document.getElementById("candidateName").innerText =
+            defaultName;
+        }
+
+    }else{
+
+        window.location.href="login.html";
+
+    }
+
+});
+
+
+/* CHANGE NAME */
+
+window.changeName = async function(){
+
+    const user = auth.currentUser;
+
+    if(!user){
+
+        alert("Please Login");
+
+        return;
+    }
 
     let newName = prompt("Enter Candidate Name");
 
     if(newName && newName.trim() !== ""){
 
-        document.getElementById("candidateName").innerText = newName;
+        await setDoc(
+            doc(db,"candidates",user.uid),
+            {
+                name:newName,
+                email:user.email
+            }
+        );
 
-        localStorage.setItem("candidateName", newName);
+        document.getElementById("candidateName").innerText =
+        newName;
+
+        alert("Name Updated");
 
     }
 
