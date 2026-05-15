@@ -88,7 +88,41 @@ cursor:pointer;
 
 <body>
 
-<div class="topbar">Candidate Dashboard</div>
+<div class="topbar">
+
+<div style="
+display:flex;
+align-items:center;
+justify-content:space-between;
+">
+
+<div>
+Candidate Dashboard
+</div>
+
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+">
+
+<img id="candidatePhoto"
+src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+style="
+width:42px;
+height:42px;
+border-radius:50%;
+object-fit:cover;
+border:2px solid #fff;
+">
+
+<span id="candidateTopName"></span>
+
+</div>
+
+</div>
+
+</div>
 
 <div class="container">
 
@@ -115,6 +149,11 @@ Welcome Candidate 👋
 <script defer src="script.js"></script>
 
 <script type="module">
+  import {
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
 onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -136,7 +175,30 @@ alert("Please login first.");
 window.location.href = "login.html";
 return;
 }
+const ref =
+doc(window.db,"candidates",user.uid);
 
+const snap =
+await getDoc(ref);
+
+if(snap.exists()){
+
+const data = snap.data();
+
+if(data.photo){
+
+document.getElementById(
+"candidatePhoto"
+).src = data.photo;
+
+}
+
+document.getElementById(
+"candidateTopName"
+).innerText =
+data.name || "Candidate";
+
+  }
 let name = user.email.split("@")[0];
 document.getElementById("welcomeBox").innerHTML =
 "Welcome " + name + " 👋";
