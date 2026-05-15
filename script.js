@@ -126,12 +126,14 @@ const uid = userCredential.user.uid;
 const { doc, setDoc } = await import(
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
 );
-
+const photo =
+document.getElementById("previewPhoto").src;
 await setDoc(doc(window.db, "candidates", uid), {
 name: name,
 mobile: mobile,
 email: email,
 uid: uid,
+photo: photo,
 createdAt: new Date().toISOString()
 });
 
