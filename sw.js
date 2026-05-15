@@ -3,10 +3,10 @@ const CACHE_NAME = 'gds-notes-v5';
 // 1. OFFLINE SUPPORT (Files to Cache)
 const ASSETS = [
   '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/gdsnotes/index.html',
+  '/gdsnotes/manifest.json',
+  '/gdsnotes/icon-192.png',
+  '/gdsnotes/icon-512.png'
 ];
 
 // INSTALL: Caching logic
