@@ -19,6 +19,119 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/gdsnotes/icon-512.png">
 
     <style>
+        <!-- =========================
+ADD THIS CSS INSIDE <style>
+WITHOUT DELETING ANYTHING
+========================= -->
+
+/* ===== Dynamic Candidate Profile ===== */
+
+.candidate-profile{
+    margin-top:25px;
+    background:rgba(255,255,255,0.12);
+    padding:20px;
+    border-radius:18px;
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.2);
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
+    text-align:center;
+}
+
+.candidate-profile img{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    border:4px solid #fff;
+    object-fit:cover;
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+.candidate-name{
+    margin-top:12px;
+    font-size:30px;
+    font-weight:bold;
+    background:linear-gradient(45deg,#ffd600,#ffffff,#00e5ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 3px 12px rgba(0,0,0,0.3);
+}
+
+.candidate-email{
+    color:#fff;
+    margin-top:6px;
+    font-size:14px;
+    opacity:0.9;
+}
+
+.profile-btns{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+}
+
+.profile-btn{
+    padding:11px 16px;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.profile-btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-dashboard{
+    background:#ffd600;
+    color:#000;
+}
+
+.btn-edit{
+    background:#fff;
+    color:#8d151a;
+}
+
+.btn-logout{
+    background:#111;
+    color:#fff;
+}
+
+.live-status{
+    margin-top:12px;
+    font-size:13px;
+    color:#00ff99;
+    font-weight:bold;
+}
+
+
+/* ===== LIVE COUNTER ===== */
+
+.live-box{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+.live-card{
+    background:rgba(255,255,255,0.15);
+    padding:14px 18px;
+    border-radius:12px;
+    color:#fff;
+    min-width:120px;
+    font-weight:bold;
+    backdrop-filter:blur(10px);
+}
+
+.live-card span{
+    display:block;
+    font-size:22px;
+    margin-top:5px;
+}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background: #f4f6fb; color: #222; }
 
@@ -184,7 +297,208 @@
         }
     </style>
 </head>
+<!-- =========================
+ADD THIS ABOVE </body>
+WITHOUT REMOVING ANYTHING
+========================= -->
 
+<!-- FIREBASE DYNAMIC PROFILE -->
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    collection,
+    getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================
+FIREBASE CONFIG
+========================= */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+
+    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+
+    projectId: "gds-departmental-exam-studyhub",
+
+    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+
+    messagingSenderId: "759916756080",
+
+    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+
+};
+
+/* =========================
+INIT
+========================= */
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+
+/* =========================
+LIVE VIEW COUNTER
+========================= */
+
+let views = localStorage.getItem("siteViews");
+
+if(!views){
+
+    views = 1;
+
+}else{
+
+    views = parseInt(views) + 1;
+
+}
+
+localStorage.setItem("siteViews", views);
+
+document.getElementById("viewCount").innerText = views;
+
+
+/* =========================
+AUTH STATE
+========================= */
+
+onAuthStateChanged(auth, async(user) => {
+
+    if(user){
+
+        const email = user.email;
+
+        document.getElementById("candidateEmail").innerText = email;
+
+        const userId = user.uid;
+
+        const docRef = doc(db, "candidates", userId);
+
+        const docSnap = await getDoc(docRef);
+
+        if(docSnap.exists()){
+
+            const data = docSnap.data();
+
+            document.getElementById("candidateName").innerText =
+            data.name || email.split("@")[0];
+
+        } else {
+
+            const defaultName = email.split("@")[0];
+
+            await setDoc(doc(db, "candidates", userId), {
+
+                name: defaultName,
+                email: email
+
+            });
+
+            document.getElementById("candidateName").innerText =
+            defaultName;
+        }
+
+    } else {
+
+        document.getElementById("candidateName").innerText =
+        "Guest User";
+
+        document.getElementById("candidateEmail").innerText =
+        "Login Required";
+
+    }
+
+});
+
+
+/* =========================
+CHANGE NAME
+========================= */
+
+window.changeCandidateName = async function(){
+
+    const user = auth.currentUser;
+
+    if(!user){
+
+        alert("Please login first");
+
+        return;
+    }
+
+    const newName = prompt("Enter Candidate Name");
+
+    if(newName && newName.trim() !== ""){
+
+        await setDoc(doc(db, "candidates", user.uid), {
+
+            name: newName,
+            email: user.email
+
+        });
+
+        document.getElementById("candidateName").innerText =
+        newName;
+
+        alert("Name Updated Successfully");
+
+    }
+
+}
+
+
+/* =========================
+LOGOUT
+========================= */
+
+window.logoutUser = async function(){
+
+    await signOut(auth);
+
+    alert("Logout Successful");
+
+    window.location.href = "/gdsnotes/login.html";
+
+}
+
+
+/* =========================
+LIVE USER COUNT
+========================= */
+
+async function loadUserCount(){
+
+    const querySnapshot = await getDocs(
+        collection(db, "candidates")
+    );
+
+    document.getElementById("userCount").innerText =
+    querySnapshot.size;
+
+}
+
+loadUserCount();
+
+                     </script>
 <body>
 
 <section class="hero">
@@ -196,6 +510,70 @@
         <p>Welcome to India’s Best GDS Preparation Platform</p>
 
         <p>Crack GDS DEPARTMENTAL Exam With Smart Study</p>
+        <!-- =========================
+ADD THIS BELOW:
+<p>Crack GDS DEPARTMENTAL Exam With Smart Study</p>
+
+WITHOUT REMOVING ANYTHING
+========================= -->
+
+<!-- Dynamic Candidate Profile -->
+<div class="candidate-profile">
+
+    <img src="/gdsnotes/icon-192.png" id="candidatePhoto">
+
+    <div class="candidate-name" id="candidateName">
+        Welcome Candidate
+    </div>
+
+    <div class="candidate-email" id="candidateEmail">
+        Login Required
+    </div>
+
+    <div class="live-status">
+        ● LIVE SECURE ACCOUNT CONNECTED
+    </div>
+
+    <div class="profile-btns">
+
+        <button class="profile-btn btn-edit"
+            onclick="changeCandidateName()">
+            Edit Name
+        </button>
+
+        <button class="profile-btn btn-dashboard"
+            onclick="window.location.href='/gdsnotes/dashboard.html'">
+            Dashboard
+        </button>
+
+        <button class="profile-btn btn-logout"
+            onclick="logoutUser()">
+            Logout
+        </button>
+
+    </div>
+
+</div>
+
+<!-- Live Stats -->
+<div class="live-box">
+
+    <div class="live-card">
+        Users
+        <span id="userCount">0</span>
+    </div>
+
+    <div class="live-card">
+        Views
+        <span id="viewCount">0</span>
+    </div>
+
+    <div class="live-card">
+        PDFs
+        <span>500+</span>
+    </div>
+
+</div>
 
         <div class="btn-group">
             <a href="/gdsnotes/login.html" class="btn btn-login">Candidate Login</a>
