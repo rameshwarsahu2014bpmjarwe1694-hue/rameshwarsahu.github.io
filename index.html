@@ -205,17 +205,37 @@
         <img src="/gdsnotes/RSH.png?v=3" class="logo" alt="Logo">
 
         <h1>RAMESHWAR SAHU GDS DEPARTMENTAL EXAM STUDY HUB</h1>
-        <button onclick="installApp()">Install App</button>
+        <button onclick="installApp()" 
+style="padding:12px 18px; background:#fff; border:none; border-radius:8px; font-weight:bold;">
+📲 Install App
+</button>
 <script>
 let deferredPrompt;
 
+// PWA install event capture
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
 });
 
+// Install function
 function installApp() {
-  deferredPrompt.prompt();
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted install');
+      } else {
+        console.log('User dismissed install');
+      }
+
+      deferredPrompt = null;
+    });
+
+  } else {
+    alert("Install option not available yet. Open site in Chrome.");
+  }
 }
 </script>
 
