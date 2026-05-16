@@ -1,9 +1,4 @@
-/* =========================
-   GDS NOTES - FINAL SW
-   PWABuilder SAFE VERSION
-========================= */
-
-const CACHE_NAME = "gds-notes-v1";
+const CACHE_NAME = "gds-notes-v9";
 
 const ASSETS = [
   "/gdsnotes/",
