@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF Watermark</title>
+</head>
+<body>
+
+<h2>Upload PDF</h2>
+
+<input type="file" id="file" accept="application/pdf"/>
+<button onclick="addWatermark()">Add Watermark</button>
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<script>
+async function addWatermark() {
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a PDF");
+        return;
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+
+    const pages = pdfDoc.getPages();
+
+    pages.forEach(page => {
+        const { width, height } = page.getSize();
+
+        page.drawText("RAMESHWAR SAHU EXAM APP", {
+            x: width / 2 - 150,
+            y: height / 2,
+            size: 35,
+            opacity: 0.2,
+            rotate: PDFLib.degrees(-45),
+        });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "watermarked.pdf";
+    a.click();
+}
+</script>
+
+</body>
+</html>
