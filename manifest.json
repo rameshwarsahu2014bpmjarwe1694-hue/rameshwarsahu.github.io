@@ -7,11 +7,11 @@
 
   "description": "Complete GDS Departmental Exam Notes, Study Material and Mock Tests.",
 
+  "{
   "start_url": "/gdsnotes/",
-
   "scope": "/gdsnotes/",
-
-  "display": "fullscreen",
+  "display": "standalone"
+}
 
   "display_override": [
     "fullscreen",
