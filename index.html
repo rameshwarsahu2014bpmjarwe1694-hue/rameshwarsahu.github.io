@@ -205,6 +205,19 @@
         <img src="/gdsnotes/RSH.png?v=3" class="logo" alt="Logo">
 
         <h1>RAMESHWAR SAHU GDS DEPARTMENTAL EXAM STUDY HUB</h1>
+        <button onclick="installApp()">Install App</button>
+<script>
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function installApp() {
+  deferredPrompt.prompt();
+}
+</script>
 
         <p>Welcome to India’s Best GDS Preparation Platform</p>
 
