@@ -28,16 +28,34 @@ async function addWatermark() {
     const pages = pdfDoc.getPages();
 
     pages.forEach(page => {
-        const { width, height } = page.getSize();
+    const { width, height } = page.getSize();
 
-        page.drawText("RAMESHWAR SAHU EXAM APP", {
-            x: width / 2 - 150,
-            y: height / 2,
-            size: 35,
-            opacity: 0.2,
-            rotate: PDFLib.degrees(-45),
-        });
+    const text = "RAMESHWAR SAHU EXAM APP";
+
+    // 🔥 Repeating watermark (full page protection)
+    for (let i = 0; i < width; i += 200) {
+        for (let j = 0; j < height; j += 150) {
+
+            page.drawText(text, {
+                x: i,
+                y: j,
+                size: 28,
+                opacity: 0.12,
+                rotate: PDFLib.degrees(-30),
+            });
+
+        }
+    }
+
+    // 🔥 Big center watermark
+    page.drawText(text, {
+        x: width / 2 - 250,
+        y: height / 2,
+        size: 60,
+        opacity: 0.08,
+        rotate: PDFLib.degrees(-45),
     });
+});
 
     const pdfBytes = await pdfDoc.save();
 
