@@ -203,9 +203,9 @@ alert(error.message);
 });
 
 };
-<script>
-
-// AUTO LOGOUT AFTER 2 MINUTES INACTIVE
+/* =========================
+AUTO LOGOUT AFTER 2 MINUTES INACTIVE
+========================= */
 
 let logoutTimer;
 
@@ -215,43 +215,41 @@ function resetLogoutTimer() {
 
     logoutTimer = setTimeout(() => {
 
-        // Firebase logout
         if (window.auth && window.signOut) {
 
-            signOut(auth)
-            .then(() => {
+            window.signOut(window.auth)
+            .then(function () {
 
                 alert("Session expired. Login again.");
+
+                localStorage.clear();
+                sessionStorage.clear();
 
                 window.location.href = "/gdsnotes/login.html";
 
             })
-            .catch((error) => {
+            .catch(function (error) {
 
                 console.log(error);
 
             });
 
-        } else {
-
-            localStorage.clear();
-            sessionStorage.clear();
-
-            window.location.href = "/gdsnotes/login.html";
-
         }
 
-    }, 2 * 60 * 1000); // 2 minutes
+    }, 2 * 60 * 1000);
 
 }
 
-// Detect activity
-window.onload = resetLogoutTimer;
+/* USER ACTIVITY DETECT */
 
-document.onmousemove = resetLogoutTimer;
-document.onkeypress = resetLogoutTimer;
-document.onclick = resetLogoutTimer;
-document.onscroll = resetLogoutTimer;
-document.ontouchstart = resetLogoutTimer;
+window.addEventListener("load", resetLogoutTimer);
 
-</script>
+document.addEventListener("mousemove", resetLogoutTimer);
+
+document.addEventListener("keypress", resetLogoutTimer);
+
+document.addEventListener("click", resetLogoutTimer);
+
+document.addEventListener("scroll", resetLogoutTimer);
+
+document.addEventListener("touchstart", resetLogoutTimer);
